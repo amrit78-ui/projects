@@ -2,7 +2,7 @@ import sqlite3
 import tkinter as tk
 from tkinter import messagebox
 
-# --- Database Setup ---
+
 conn = sqlite3.connect("questions.db")
 cursor = conn.cursor()
 cursor.execute("""
@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS questions (
 """)
 conn.commit()
 
-# Pre-fill SQL questions if table is empty
 sql_questions = [
     ("Which SQL statement is used to extract data from a database?", "GET", "SELECT", "EXTRACT", "OPEN", "SELECT"),
     ("Which SQL statement is used to delete data from a table?", "REMOVE", "DELETE", "DROP", "ERASE", "DELETE"),
@@ -31,7 +30,33 @@ if cursor.fetchone()[0] == 0:
     cursor.executemany("INSERT INTO questions (question, option1, option2, option3, option4, answer) VALUES (?, ?, ?, ?, ?, ?)", sql_questions)
     conn.commit()
 
-# --- Main Window ---
+ADMIN_ID = "admin"
+ADMIN_PASS = "1234"
+
+def open_admin_login():
+    login_win = tk.Toplevel()
+    login_win.title("Admin Login")
+    login_win.geometry("300x220")
+
+    tk.Label(login_win, text="🔐 Admin Login", font=("Helvetica", 16, "bold")).pack(pady=10)
+    tk.Label(login_win, text="Admin ID:").pack()
+    id_entry = tk.Entry(login_win)
+    id_entry.pack(pady=5)
+
+    tk.Label(login_win, text="Password:").pack()
+    pass_entry = tk.Entry(login_win, show="*")
+    pass_entry.pack(pady=5)
+
+    def verify_login():
+        if id_entry.get() == ADMIN_ID and pass_entry.get() == ADMIN_PASS:
+            messagebox.showinfo("Access Granted", "Welcome, Admin!")
+            login_win.destroy()
+            open_admin_window()
+        else:
+            messagebox.showerror("Access Denied", "Invalid ID or Password")
+
+    tk.Button(login_win, text="Login", command=verify_login, bg="green", fg="white").pack(pady=10)
+
 def open_admin_window():
     admin_window = tk.Toplevel()
     admin_window.title("Admin Panel")
@@ -87,7 +112,7 @@ def open_admin_window():
     tk.Button(admin_window, text="Add Question", command=add_question, width=20, bg="blue", fg="white").pack(pady=5)
     tk.Button(admin_window, text="View Questions", command=view_questions, width=20, bg="purple", fg="white").pack(pady=5)
 
-# --- Quiz Window ---
+
 def start_quiz():
     cursor.execute("SELECT * FROM questions")
     questions = cursor.fetchall()
@@ -137,13 +162,13 @@ def start_quiz():
 
     show_question()
 
-# --- Main GUI ---
+
 root = tk.Tk()
 root.title("📚 SQL Question Bank System")
 root.geometry("400x300")
 
 tk.Label(root, text="SQL Question Bank", font=("Helvetica", 18, "bold")).pack(pady=20)
 tk.Button(root, text="Start Quiz", command=start_quiz, width=20, bg="orange", fg="white").pack(pady=10)
-tk.Button(root, text="Admin Panel", command=open_admin_window, width=20, bg="blue", fg="white").pack(pady=10)
+tk.Button(root, text="Admin Panel", command=open_admin_login, width=20, bg="blue", fg="white").pack(pady=10)
 
 root.mainloop()
